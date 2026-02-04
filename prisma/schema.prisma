@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  name         String?
+  lastActiveAt DateTime       @default(now())
+  pushToken    String?
+  preferences  String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  notifications Notification[]
+}
+
+model Campaign {
+  id          String         @id @default(cuid())
+  name        String
+  subject     String
+  content     String
+  targetDays  Int            @default(60)
+  status      String         @default("DRAFT") // DRAFT, ACTIVE, PAUSED, COMPLETED
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  notifications Notification[]
+}
+
+model Notification {
+  id         String    @id @default(cuid())
+  userId     String
+  campaignId String
+  channel    String    // EMAIL, PUSH
+  sentAt     DateTime  @default(now())
+  openedAt   DateTime?
+  user       User      @relation(fields: [userId], references: [id])
+  campaign   Campaign  @relation(fields: [campaignId], references: [id])
+}
